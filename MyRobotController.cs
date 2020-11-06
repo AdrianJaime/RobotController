@@ -13,6 +13,15 @@ namespace RobotController
         public float x;
         public float y;
         public float z;
+
+        //Constructor
+        public MyQuat(float x, float y, float z, float w)
+        {
+            this.x = x;
+            this.y = y;
+            this.z = z;
+            this.w = w;
+        }
     }
 
     public struct MyVec
@@ -21,6 +30,14 @@ namespace RobotController
         public float x;
         public float y;
         public float z;
+
+        //Constructor
+        public MyVec(float x, float y, float z)
+        {
+            this.x = x;
+            this.y = y;
+            this.z = z;
+        }
     }
 
 
@@ -48,20 +65,16 @@ namespace RobotController
 
         public void PutRobotStraight(out MyQuat rot0, out MyQuat rot1, out MyQuat rot2, out MyQuat rot3) {
 
-            //todo: change this, use the function Rotate declared below
-
-            lref2 = lref = 0;
-
-            startingQuat[0] = rot0 = Rotate(new MyQuat(0, 0, 0, 1), new MyVec(0, 1, 0), 74);
-
-            startingQuat[1] = rot1 = Multiply(rot0, Rotate(new MyQuat(0, 0, 0, 1), new MyVec(1, 0, 0), 1));
-
-            startingQuat[2] = rot2 = Multiply(rot1, Rotate(new MyQuat(0, 0, 0, 1), new MyVec(1, 0, 0), 60));
-
-            startingQuat[3] = rot3 = Multiply(rot2, Rotate(new MyQuat(0, 0, 0, 1), new MyVec(1, 0, 0), 45));
+            //Set first quaternion to identity to keep it at no rotation
+            rot0 = Rotate(new MyQuat(0, 0, 0, 1), new MyVec(0, 1, 0), 74);
+            
+            //Rotate childs
+            rot1 = Multiply(rot0, Rotate(new MyQuat(0, 0, 0, 1), new MyVec(1, 0, 0), 1));
+            rot2 = Multiply(rot1, Rotate(new MyQuat(0, 0, 0, 1), new MyVec(1, 0, 0), 60));
+            rot3 = Multiply(rot2, Rotate(new MyQuat(0, 0, 0, 1), new MyVec(1, 0, 0), 45));
         }
 
-
+        
 
         //EX2: this function will interpolate the rotations necessary to move the arm of the robot until its end effector collides with the target (called Stud_target)
         //it will return true until it has reached its destination. The main project is set up in such a way that when the function returns false, the object will be droped and fall following gravity.
@@ -152,8 +165,6 @@ namespace RobotController
         internal int TimeSinceMidnight { get { return (DateTime.Now.Hour * 3600000) + (DateTime.Now.Minute * 60000) + (DateTime.Now.Second * 1000) + DateTime.Now.Millisecond; } }
 
         internal float lref, lref2;
-
-        MyQuat[] startingQuat = new MyQuat[4];
 
         private static MyQuat NullQ
         {
