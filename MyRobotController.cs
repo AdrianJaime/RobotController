@@ -163,16 +163,38 @@ namespace RobotController
         internal MyQuat Multiply(MyQuat q1, MyQuat q2) {
 
             //todo: change this so it returns a multiplication:
-            return NullQ;
-
+            MyQuat myQuaternion = new MyQuat();
+            myQuaternion.w = (float)((double)q2.w * (double)q1.w - (double)q2.x * (double)q1.x - (double)q2.y * (double)q1.y - (double)q2.z * (double)q1.z);
+            myQuaternion.x = (float)((double)q2.w * (double)q1.x + (double)q2.x * (double)q1.w - (double)q2.y * (double)q1.z + (double)q2.z * (double)q1.y);
+            myQuaternion.y = (float)((double)q2.w * (double)q1.y + (double)q2.x * (double)q1.z + (double)q2.y * (double)q1.w - (double)q2.z * (double)q1.x);
+            myQuaternion.z = (float)((double)q2.w * (double)q1.z - (double)q2.x * (double)q1.y + (double)q2.y * (double)q1.x + (double)q2.z * (double)q1.w);
+            myQuaternion = Normalize(myQuaternion);
+            return myQuaternion;
         }
 
         internal MyQuat Rotate(MyQuat currentRotation, MyVec axis, float angle)
         {
 
             //todo: change this so it takes currentRotation, and calculate a new quaternion rotated by an angle "angle" radians along the normalized axis "axis"
-            return NullQ;
+            MyQuat myQuaternion = new MyQuat();
 
+            angle = angle * (float)(Math.PI / 180);
+
+            float num = (float)Math.Sqrt(Math.Pow((double)axis.x, 2.0) + Math.Pow((double)axis.y, 2.0) + Math.Pow((double)axis.z, 2.0));
+            axis.x /= num;
+            axis.y /= num;
+            axis.z /= num;
+
+            myQuaternion.x = axis.x * (float)Math.Sin((double)angle / 2.0);
+            myQuaternion.y = axis.y * (float)Math.Sin((double)angle / 2.0);
+            myQuaternion.z = axis.z * (float)Math.Sin((double)angle / 2.0);
+            myQuaternion.w = (float)Math.Cos((double)angle / 2.0);
+            myQuaternion = Normalize(myQuaternion);
+
+
+            currentRotation = Normalize(currentRotation);
+
+            return Multiply(myQuaternion, currentRotation);
         }
 
 
