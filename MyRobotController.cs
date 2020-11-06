@@ -49,10 +49,16 @@ namespace RobotController
         public void PutRobotStraight(out MyQuat rot0, out MyQuat rot1, out MyQuat rot2, out MyQuat rot3) {
 
             //todo: change this, use the function Rotate declared below
-            rot0 = NullQ;
-            rot1 = NullQ;
-            rot2 = NullQ;
-            rot3 = NullQ;
+
+            lref2 = lref = 0;
+
+            startingQuat[0] = rot0 = Rotate(new MyQuat(0, 0, 0, 1), new MyVec(0, 1, 0), 74);
+
+            startingQuat[1] = rot1 = Multiply(rot0, Rotate(new MyQuat(0, 0, 0, 1), new MyVec(1, 0, 0), 1));
+
+            startingQuat[2] = rot2 = Multiply(rot1, Rotate(new MyQuat(0, 0, 0, 1), new MyVec(1, 0, 0), 60));
+
+            startingQuat[3] = rot3 = Multiply(rot2, Rotate(new MyQuat(0, 0, 0, 1), new MyVec(1, 0, 0), 45));
         }
 
 
@@ -145,6 +151,9 @@ namespace RobotController
 
         internal int TimeSinceMidnight { get { return (DateTime.Now.Hour * 3600000) + (DateTime.Now.Minute * 60000) + (DateTime.Now.Second * 1000) + DateTime.Now.Millisecond; } }
 
+        internal float lref, lref2;
+
+        MyQuat[] startingQuat = new MyQuat[4];
 
         private static MyQuat NullQ
         {
@@ -202,6 +211,17 @@ namespace RobotController
 
         //todo: add here all the functions needed
 
+        internal MyQuat Normalize(MyQuat myQuaternion)
+        {
+            double result = Math.Sqrt((double)myQuaternion.x * (double)myQuaternion.x + (double)myQuaternion.y * (double)myQuaternion.y + (double)myQuaternion.z * (double)myQuaternion.z + (double)myQuaternion.w * (double)myQuaternion.w);
+
+            myQuaternion.x /= (float)result;
+            myQuaternion.y /= (float)result;
+            myQuaternion.z /= (float)result;
+            myQuaternion.w /= (float)result;
+
+            return myQuaternion;
+        }
         #endregion
 
 
