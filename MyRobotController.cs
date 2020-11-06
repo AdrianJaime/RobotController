@@ -65,13 +65,16 @@ namespace RobotController
 
         public void PutRobotStraight(out MyQuat rot0, out MyQuat rot1, out MyQuat rot2, out MyQuat rot3) {
 
+            //Restart exercises
+            finished = false;
+
             //Set first quaternion to identity to keep it at no rotation
-            rot0 = Rotate(new MyQuat(0, 0, 0, 1), new MyVec(0, 1, 0), 74);
+            rot0 = Rotate(new MyQuat(0, 0, 0, 1), new MyVec(0, 1, 0), 73);
             
             //Rotate childs
-            rot1 = Multiply(rot0, Rotate(new MyQuat(0, 0, 0, 1), new MyVec(1, 0, 0), 1));
-            rot2 = Multiply(rot1, Rotate(new MyQuat(0, 0, 0, 1), new MyVec(1, 0, 0), 60));
-            rot3 = Multiply(rot2, Rotate(new MyQuat(0, 0, 0, 1), new MyVec(1, 0, 0), 45));
+            rot1 = Multiply(rot0, Rotate(new MyQuat(0, 0, 0, 1), new MyVec(1, 0, 0), startingPoint[1]));
+            rot2 = Multiply(rot1, Rotate(new MyQuat(0, 0, 0, 1), new MyVec(1, 0, 0), startingPoint[2]));
+            rot3 = Multiply(rot2, Rotate(new MyQuat(0, 0, 0, 1), new MyVec(1, 0, 0), startingPoint[3]));
         }
 
         
@@ -82,24 +85,38 @@ namespace RobotController
 
         public bool PickStudAnim(out MyQuat rot0, out MyQuat rot1, out MyQuat rot2, out MyQuat rot3)
         {
-
-            bool myCondition = false;
-            //todo: add a check for your condition
-
-
-
-            if (myCondition)
+            //First time it goes into this function it sets everything up.
+            if (!myCondition && !finished)
             {
-                //todo: add your code here
-                rot0 = NullQ;
-                rot1 = NullQ;
-                rot2 = NullQ;
-                rot3 = NullQ;
+                lerpValue = 0;
+                myCondition = true;
+            }
 
+
+            //lerp between the startingPoint and the endingPoint to know the rotation value we'll have to multiply by.
+            if(myCondition)
+            {
+                lerpValue += 0.01f;
+                float rotation0 = Lerp(startingPoint[0], endingPoint[0], lerpValue);
+                float rotation1 = Lerp(startingPoint[1], endingPoint[1], lerpValue);
+                float rotation2 = Lerp(startingPoint[2], endingPoint[2], lerpValue);
+                float rotation3 = Lerp(startingPoint[3], endingPoint[3], lerpValue);
+
+
+                //Check if finished
+                if (rotation0 <= endingPoint[0] && rotation1 >= endingPoint[1] && rotation2 <= endingPoint[2] && rotation3 <= endingPoint[3])
+                { 
+                    myCondition = false;
+                    finished = true;
+                }
+
+                rot0 = Rotate(Rotate(new MyQuat(0, 0, 0, 1), new MyVec(0, 1, 0), 73f), new MyVec(0, 1, 0), rotation0);
+                rot1 = Multiply(rot0, Rotate(new MyQuat(0, 0, 0, 1), new MyVec(1, 0, 0), rotation1));
+                rot2 = Multiply(rot1, Rotate(new MyQuat(0, 0, 0, 1), new MyVec(1, 0, 0), rotation2));
+                rot3 = Multiply(rot2, Rotate(new MyQuat(0, 0, 0, 1), new MyVec(1, 0, 0), rotation3));
 
                 return true;
             }
-
             //todo: remove this once your code works.
             rot0 = NullQ;
             rot1 = NullQ;
@@ -164,7 +181,14 @@ namespace RobotController
 
         internal int TimeSinceMidnight { get { return (DateTime.Now.Hour * 3600000) + (DateTime.Now.Minute * 60000) + (DateTime.Now.Second * 1000) + DateTime.Now.Millisecond; } }
 
-        internal float lref, lref2;
+        bool myCondition = false;
+        bool finished = false;
+
+        float lerpValue = 0;
+
+        float[] startingPoint = { 0, -5, 87, 24 };
+
+        float[] endingPoint = { -32, 17, 57, 20 };
 
         private static MyQuat NullQ
         {
@@ -232,6 +256,11 @@ namespace RobotController
             myQuaternion.w /= (float)result;
 
             return myQuaternion;
+        }
+
+        internal float Lerp(float initialFloat, float finalFloat, float f)
+        {
+            return initialFloat + f * (finalFloat - initialFloat);
         }
         #endregion
 
